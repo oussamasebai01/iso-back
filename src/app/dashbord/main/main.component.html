@@ -1,0 +1,92 @@
+<!-- ========================= Main ==================== -->
+<div class="main">
+    <div class="topbar">
+        <div class="toggle">
+            <ion-icon name="menu-outline"></ion-icon>
+        </div>
+        <div class="search">
+            <label>
+                <input 
+                    type="text" 
+                    placeholder="Rechercher par fournisseur" 
+                    [(ngModel)]="searchTerm" 
+                    (input)="filterInvoices()" 
+                >
+                <ion-icon name="search-outline"></ion-icon>
+            </label>
+        </div>
+        <div class="user">
+            <img src="assets/as/imgs/customer01.jpg" alt="">
+        </div>
+    </div>
+
+    <!-- ======================= Formulaire Invoice ================== -->
+    <div class="invoice-form">
+        <h2>{{ isEditMode ? 'Modifier la facture' : 'Ajouter une nouvelle facture' }}</h2>
+        <form #invoiceForm="ngForm" (ngSubmit)="onSubmit(invoiceForm.value)">
+            <div class="form-group">
+                <label for="invoiceNumber">Numéro de facture</label>
+                <input type="text" id="invoiceNumber" name="invoiceNumber" [(ngModel)]="invoice.invoiceNumber" required placeholder="Ex: INV-2023-002">
+            </div>
+            <div class="form-group">
+                <label for="vendorName">Nom du fournisseur</label>
+                <input type="text" id="vendorName" name="vendorName" [(ngModel)]="invoice.vendorName" required placeholder="Ex: Fournisseur DEF">
+            </div>
+            <div class="form-group">
+                <label for="amount">Montant (€)</label>
+                <input type="number" id="amount" name="amount" [(ngModel)]="invoice.amount" required min="0" step="0.01" placeholder="Ex: 1250.50">
+            </div>
+            <div class="form-group">
+                <label for="invoiceDate">Date de la facture</label>
+                <input type="date" id="invoiceDate" name="invoiceDate" [(ngModel)]="invoice.invoiceDate" required>
+            </div>
+            <div class="form-group">
+                <label for="dueDate">Date d'échéance</label>
+                <input type="date" id="dueDate" name="dueDate" [(ngModel)]="invoice.dueDate" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" [(ngModel)]="invoice.description" required placeholder="Ex: Facture pour services..."></textarea>
+            </div>
+            <button type="submit" class="btn-submit" [disabled]="!invoiceForm.valid">
+                {{ isEditMode ? 'Mettre à jour' : 'Ajouter' }}
+            </button>
+            <button type="button" class="btn-cancel" (click)="resetForm()" *ngIf="isEditMode">Annuler</button>
+        </form>
+    </div>
+
+    <!-- ======================= Tableau des Invoices ================== -->
+    <div class="invoice-table">
+        <h2>Liste des factures</h2>
+        <button class="btn-export" (click)="exportToCsv()">Export CSV</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Numéro</th>
+                    <th>Fournisseur</th>
+                    <th>Montant (€)</th>
+                    <th>Date</th>
+                    <th>Échéance</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let invoice of filteredInvoices; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ invoice.invoiceNumber }}</td>
+                    <td>{{ invoice.vendorName }}</td>
+                    <td>{{ invoice.amount | number:'1.2-2' }}</td>
+                    <td>{{ invoice.invoiceDate | date:'yyyy-MM-dd' }}</td>
+                    <td>{{ invoice.dueDate | date:'yyyy-MM-dd' }}</td>
+                    <td>{{ invoice.status }}</td>
+                    <td>
+                        <button (click)="editInvoice(invoice)">Modifier</button>
+                        <button (click)="deleteInvoice(invoice.id)">Supprimer</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

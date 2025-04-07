@@ -15,71 +15,69 @@
         </div>
     </div>
     <div class="conformance">
-        <!-- ======================= Formulaire Non-Conformance ================== -->
+        <!-- ======================= Non-Conformance Form ================== -->
         <div class="non-conformance-form">
-            <h2>{{ isEditMode ? 'Modifier la non-conformité' : 'Ajouter une nouvelle non-conformité' }}</h2>
+            <h2>{{ isEditMode ? 'Edit Non-Conformance' : 'Add New Non-Conformance' }}</h2>
             <form #nonConformanceForm="ngForm" (ngSubmit)="onSubmit(nonConformanceForm.value)">
                 <div class="form-group">
-                    <label for="title">Titre</label>
-                    <input type="text" id="title" name="title" [(ngModel)]="nonConformance.title" required placeholder="Ex: Problème de qualité">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" [(ngModel)]="nonConformance.title" required placeholder="Ex: Quality Issue">
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" [(ngModel)]="nonConformance.description" required placeholder="Ex: Description détaillée du problème..."></textarea>
+                    <textarea id="description" name="description" [(ngModel)]="nonConformance.description" required placeholder="Ex: Detailed description of the issue..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="status">Statut</label>
+                    <label for="status">Status</label>
                     <select id="status" name="status" [(ngModel)]="nonConformance.status" required>
-                        <option value="OPEN">Ouverte</option>
-                        <option value="IN_PROGRESS">En cours</option>
-                        <option value="CLOSED">Fermée</option>
+                        <option value="OPEN">Open</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="CLOSED">Closed</option>
                     </select>
                 </div>
-            
                 <div class="form-group">
-                    <label for="assignedTo">Assignée à</label>
-                    <input type="text" id="assignedTo" name="assignedTo" [(ngModel)]="nonConformance.assignedTo" placeholder="Ex: Nom de la personne (optionnel)">
+                    <label for="assignedTo">Assigned To</label>
+                    <input type="text" id="assignedTo" name="assignedTo" [(ngModel)]="nonConformance.assignedTo" placeholder="Ex: Person's name (optional)">
                 </div>
                 <button type="submit" class="btn-submit" [disabled]="!nonConformanceForm.valid">
-                    {{ isEditMode ? 'Mettre à jour' : 'Ajouter' }}
+                    {{ isEditMode ? 'Update' : 'Add' }}
                 </button>
-                <button type="button" class="btn-cancel" (click)="resetForm()" *ngIf="isEditMode">Annuler</button>
+                <button type="button" class="btn-cancel" (click)="resetForm()" *ngIf="isEditMode">Cancel</button>
             </form>
         </div>
 
-
-
-    <!-- ======================= Tableau des Non-Conformances ================== -->
-    <div class="non-conformance-table">
-        <h2>Liste des non-conformités</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Titre</th>
-                    <th>Description</th>
-                    <th>Statut</th>
-                    <th>Date de création</th>
-                    <th>Date de mise à jour</th>
-                    <th>Assignée à</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let nc of nonConformances; let i = index">
-                    <td>{{ i + 1 }}</td>
-                    <td>{{ nc.title }}</td>
-                    <td>{{ nc.description }}</td>
-                    <td>{{ nc.status }}</td>
-                    <td>{{ nc.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                    <td>{{ nc.updatedAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                    <td>{{ nc.assignedTo || 'Non assigné' }}</td>
-                    <td>
-                        <button (click)="editNonConformance(nc)">Modifier</button>
-                        <button (click)="deleteNonConformance(nc.id)">Supprimer</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- ======================= Non-Conformance Table ================== -->
+        <div class="non-conformance-table">
+            <h2>List of Non-Conformances</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Creation Date</th>
+                        <th>Update Date</th>
+                        <th>Assigned To</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let nc of nonConformances; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ nc.title }}</td>
+                        <td>{{ nc.description }}</td>
+                        <td>{{ nc.status }}</td>
+                        <td>{{ nc.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                        <td>{{ nc.updatedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                        <td>{{ nc.assignedTo || 'Not Assigned' }}</td>
+                        <td>
+                            <button (click)="editNonConformance(nc)">Edit</button>
+                            <button (click)="deleteNonConformance(nc.id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    </div>
+</div>

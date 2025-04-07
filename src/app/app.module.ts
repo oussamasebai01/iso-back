@@ -34,6 +34,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ConformanceComponent } from './dashbord/conformance/conformance.component';
+import { HrComponent } from './dashbord/hr/hr.component';
 
 
 
@@ -45,7 +46,8 @@ const routes: Routes = [
     component: DashbordComponent,
     children: [
       { path: '', component: MainComponent }, // /dashboard
-      { path: 'conformance', component: ConformanceComponent } // /dashboard/conformance
+      { path: 'conformance', component: ConformanceComponent }, // /dashboard/conformance
+      { path: 'hr', component: HrComponent } // /dashboard/hr
     ]
   },
   { path: 'register', component: RegisterComponent },
@@ -81,7 +83,8 @@ const routes: Routes = [
     LoginComponent,
     SingComponent,
     NotFoundComponent,
-    ConformanceComponent
+    ConformanceComponent,
+    HrComponent
 
   ],
   imports: [

@@ -119,7 +119,7 @@ export class MainComponent implements AfterViewInit {
 
   deleteInvoice(id: string) {
     if (confirm('Voulez-vous vraiment supprimer cette facture ?')) {
-      this.http.delete(`http://localhost:8070/api/invoices/${id}`).subscribe(
+      this.http.delete(`http://localhost:8070/api/invoices/`).subscribe(
         (response) => {
           console.log('Facture supprimée :', response);
           this.invoices = this.invoices.filter(inv => inv.id !== id);

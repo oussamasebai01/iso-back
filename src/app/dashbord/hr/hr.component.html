@@ -59,4 +59,102 @@
             </table>
         </div>
     </div>
+    <div class="container">
+        <h1>HR Dashboard</h1>
+      
+        <!-- Date Range Selector -->
+        <div class="date-range">
+          <label>Start Date: </label>
+          <input type="date" [(ngModel)]="startDate" (change)="loadDashboardData()" />
+          <label>End Date: </label>
+          <input type="date" [(ngModel)]="endDate" (change)="loadDashboardData()" />
+        </div>
+      
+        <!-- Overall Metrics -->
+        <div class="overall-metrics" *ngIf="dashboardData">
+          <div class="card">
+            <h3>Overall Turnover Rate</h3>
+            <p>{{ dashboardData.overallTurnoverRate | number:'1.1-1' }}%</p>
+          </div>
+          <div class="card">
+            <h3>Overall Training Completion</h3>
+            <p>{{ dashboardData.overallTrainingCompletionRate | number:'1.1-1' }}%</p>
+          </div>
+          <div class="card">
+            <h3>Overall Performance</h3>
+            <p>{{ dashboardData.overallAveragePerformance | number:'1.1-1' }}</p>
+          </div>
+        </div>
+      
+        <!-- Department Metrics -->
+        <div class="charts" *ngIf="dashboardData">
+          <!-- Turnover Chart -->
+          <div class="chart">
+            <h3>Turnover Rate by Department</h3>
+            <canvas baseChart
+                    [data]="turnoverChartData"
+                    [type]="barChartType"
+                    [options]="barChartOptions"></canvas>
+          </div>
+      
+          <!-- Training Completion Chart -->
+          <div class="chart">
+            <h3>Training Completion by Department</h3>
+            <canvas baseChart
+                    [data]="trainingChartData"
+                    [type]="barChartType"
+                    [options]="barChartOptions"></canvas>
+          </div>
+      
+          <!-- Performance Chart -->
+          <div class="chart">
+            <h3>Average Performance by Department</h3>
+            <canvas baseChart
+                    [data]="performanceChartData"
+                    [type]="barChartType"
+                    [options]="barChartOptions"></canvas>
+          </div>
+        </div>
+      
+        <!-- Detailed Department Data -->
+        <div class="department-details" *ngIf="dashboardData">
+          <h2>Department Details</h2>
+          <div *ngFor="let dept of dashboardData.departments | keyvalue">
+            <h3>{{ dept.key }}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Turnover Rate</td>
+                  <td>{{ dept.value.turnoverRate | number:'1.1-1' }}%</td>
+                </tr>
+                <tr>
+                  <td>Training Completion Rate</td>
+                  <td>{{ dept.value.trainingCompletionRate | number:'1.1-1' }}%</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Performance Metrics</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let metric of dept.value.performanceMetrics | keyvalue">
+                  <td>{{ metric.key }}</td>
+                  <td>{{ metric.value | number:'1.1-1' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 </div>

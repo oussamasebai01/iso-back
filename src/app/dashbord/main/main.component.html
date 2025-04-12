@@ -1,92 +1,300 @@
-<!-- ========================= Main ==================== -->
+<!-- src/app/main/main.component.html -->
 <div class="main">
+    <!-- Topbar -->
     <div class="topbar">
-        <div class="toggle">
-            <ion-icon name="menu-outline"></ion-icon>
-        </div>
-        <div class="search">
-            <label>
-                <input 
-                    type="text" 
-                    placeholder="Search by vendor" 
-                    [(ngModel)]="searchTerm" 
-                    (input)="filterInvoices()" 
-                >
-                <ion-icon name="search-outline"></ion-icon>
-            </label>
-        </div>
-        <div class="user">
-            <img src="assets/as/imgs/customer01.jpg" alt="">
-        </div>
+      <div class="toggle">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="search">
+        <label>
+          <input
+            type="text"
+            placeholder="Search by number, vendor, status, or description"
+            [(ngModel)]="searchTerm"
+            (input)="filterInvoices()"
+          />
+          <ion-icon name="search-outline"></ion-icon>
+        </label>
+      </div>
+      <div class="user">
+        <img src="assets/as/imgs/customer01.jpg" alt="User profile" />
+      </div>
     </div>
-
-    <!-- ======================= Invoice Form ================== -->
-    <div class="invoice-form">
-        <h2>{{ isEditMode ? 'Edit Invoice' : 'Add New Invoice' }}</h2>
-        <form #invoiceForm="ngForm" (ngSubmit)="onSubmit(invoiceForm.value)">
-            <div class="form-group">
-                <label for="invoiceNumber">Invoice Number</label>
-                <input type="text" id="invoiceNumber" name="invoiceNumber" [(ngModel)]="invoice.invoiceNumber" required placeholder="Ex: INV-2023-002">
-            </div>
-            <div class="form-group">
-                <label for="vendorName">Vendor Name</label>
-                <input type="text" id="vendorName" name="vendorName" [(ngModel)]="invoice.vendorName" required placeholder="Ex: Vendor DEF">
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount (€)</label>
-                <input type="number" id="amount" name="amount" [(ngModel)]="invoice.amount" required min="0" step="0.01" placeholder="Ex: 1250.50">
-            </div>
-            <div class="form-group">
-                <label for="invoiceDate">Invoice Date</label>
-                <input type="date" id="invoiceDate" name="invoiceDate" [(ngModel)]="invoice.invoiceDate" required>
-            </div>
-            <div class="form-group">
-                <label for="dueDate">Due Date</label>
-                <input type="date" id="dueDate" name="dueDate" [(ngModel)]="invoice.dueDate" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" [(ngModel)]="invoice.description" required placeholder="Ex: Invoice for services..."></textarea>
-            </div>
-            <button type="submit" class="btn-submit" [disabled]="!invoiceForm.valid">
-                {{ isEditMode ? 'Update' : 'Add' }}
-            </button>
-            <button type="button" class="btn-cancel" (click)="resetForm()" *ngIf="isEditMode">Cancel</button>
-        </form>
+  
+    <!-- Invoice Form -->
+    <div class="invoice-form card">
+      <h2>{{ isEditMode ? 'Edit Invoice' : 'Add New Invoice' }}</h2>
+      <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="invoiceNumber">Invoice Number</label>
+          <input
+            id="invoiceNumber"
+            formControlName="invoiceNumber"
+            type="text"
+            placeholder="Ex: INV-2023-002"
+            class="form-control"
+          />
+          <div
+            *ngIf="invoiceForm.get('invoiceNumber')?.invalid && invoiceForm.get('invoiceNumber')?.touched"
+            class="text-danger"
+          >
+            Invoice number is required.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="vendorName">Vendor Name</label>
+          <input
+            id="vendorName"
+            formControlName="vendorName"
+            type="text"
+            placeholder="Ex: Vendor DEF"
+            class="form-control"
+          />
+          <div
+            *ngIf="invoiceForm.get('vendorName')?.invalid && invoiceForm.get('vendorName')?.touched"
+            class="text-danger"
+          >
+            Vendor name is required.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="amount">Amount (€)</label>
+          <input
+            id="amount"
+            formControlName="amount"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Ex: 1250.50"
+            class="form-control"
+          />
+          <div
+            *ngIf="invoiceForm.get('amount')?.invalid && invoiceForm.get('amount')?.touched"
+            class="text-danger"
+          >
+            Amount must be greater than or equal to 0.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="invoiceDate">Invoice Date</label>
+          <input
+            id="invoiceDate"
+            formControlName="invoiceDate"
+            type="date"
+            class="form-control"
+          />
+          <div
+            *ngIf="invoiceForm.get('invoiceDate')?.invalid && invoiceForm.get('invoiceDate')?.touched"
+            class="text-danger"
+          >
+            Invoice date is required.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="dueDate">Due Date</label>
+          <input
+            id="dueDate"
+            formControlName="dueDate"
+            type="date"
+            class="form-control"
+          />
+          <div
+            *ngIf="invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched"
+            class="text-danger"
+          >
+            Due date is required.
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            placeholder="Ex: Invoice for services..."
+            class="form-control"
+          ></textarea>
+          <div
+            *ngIf="invoiceForm.get('description')?.invalid && invoiceForm.get('description')?.touched"
+            class="text-danger"
+          >
+            Description is required.
+          </div>
+        </div>
+  <!-- Budget -->
+<div class="form-group">
+    <label for="budget">Budget (€)</label>
+    <input
+      id="budget"
+      formControlName="budget"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="Ex: 2000.00"
+      class="form-control"
+    />
+    <div *ngIf="invoiceForm.get('budget')?.invalid && invoiceForm.get('budget')?.touched" class="text-danger">
+      Budget invalide.
     </div>
-
-    <!-- ======================= Invoice Table ================== -->
-    <div class="invoice-table">
-        <h2>Invoice List</h2>
-        <button class="btn-export" (click)="exportToCsv()">Export to CSV</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Number</th>
-                    <th>Vendor</th>
-                    <th>Amount (€)</th>
-                    <th>Date</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let invoice of filteredInvoices; let i = index">
-                    <td>{{ i + 1 }}</td>
-                    <td>{{ invoice.invoiceNumber }}</td>
-                    <td>{{ invoice.vendorName }}</td>
-                    <td>{{ invoice.amount | number:'1.2-2' }}</td>
-                    <td>{{ invoice.invoiceDate | date:'yyyy-MM-dd' }}</td>
-                    <td>{{ invoice.dueDate | date:'yyyy-MM-dd' }}</td>
-                    <td>{{ invoice.status }}</td>
-                    <td>
-                        <button (click)="editInvoice(invoice)">Edit</button>
-                        <button (click)="deleteInvoice(invoice.id)">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+  </div>
+  
+  <!-- Dépense -->
+  <div class="form-group">
+    <label for="depense">Dépense (€)</label>
+    <input
+      id="depense"
+      formControlName="depense"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="Ex: 1500.75"
+      class="form-control"
+    />
+    <div *ngIf="invoiceForm.get('depense')?.invalid && invoiceForm.get('depense')?.touched" class="text-danger">
+      Dépense invalide.
     </div>
-</div>
+  </div>
+  
+  <!-- Gain Annuel -->
+  <div class="form-group">
+    <label for="gainAnnuel">Gain Annuel (€)</label>
+    <input
+      id="gainAnnuel"
+      formControlName="gainAnnuel"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="Ex: 500.00"
+      class="form-control"
+    />
+    <div *ngIf="invoiceForm.get('gainAnnuel')?.invalid && invoiceForm.get('gainAnnuel')?.touched" class="text-danger">
+      Gain annuel invalide.
+    </div>
+  </div>
+  
+  <!-- Département -->
+  <div class="form-group">
+    <label for="department">Département</label>
+    <input
+      id="department"
+      formControlName="department"
+      type="text"
+      placeholder="Ex: Finance"
+      class="form-control"
+    />
+  </div>
+  
+  <!-- Projet -->
+  <div class="form-group">
+    <label for="project">Projet</label>
+    <input
+      id="project"
+      formControlName="project"
+      type="text"
+      placeholder="Ex: Projet Alpha"
+      class="form-control"
+    />
+  </div>
+  
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="invoiceForm.invalid"
+        >
+          {{ isEditMode ? 'Update' : 'Add' }}
+        </button>
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="resetForm()"
+          *ngIf="isEditMode"
+        >
+          Cancel
+        </button>
+      </form>
+    </div>
+  
+    <!-- Invoice Table -->
+    <div class="invoice-table card">
+      <h2>Invoice List</h2>
+      <div class="export-buttons">
+        <button class="btn-export" (click)="exportReport('CSV')">Export to CSV</button>
+        <button class="btn-export" (click)="exportReport('PDF')">Export to PDF</button>
+        <button class="btn-export" (click)="exportReport('JSON')">Export to JSON</button>
+      </div>
+      <form class="filter-form" (ngSubmit)="applyFilters(filterForm.value)" #filterForm="ngForm">
+        <div class="filter-row">
+          <input
+            type="date"
+            name="startDate"
+            [(ngModel)]="filterValues.startDate"
+            placeholder="Start Date"
+          />
+          <input
+            type="date"
+            name="endDate"
+            [(ngModel)]="filterValues.endDate"
+            placeholder="End Date"
+          />
+          <input
+            type="text"
+            name="department"
+            [(ngModel)]="filterValues.department"
+            placeholder="Department"
+          />
+          <input
+            type="text"
+            name="project"
+            [(ngModel)]="filterValues.project"
+            placeholder="Project"
+          />
+          <button type="submit" class="btn-filter">Apply Filters</button>
+          <button type="button" class="btn-reset" (click)="resetFilters()">Reset</button>
+        </div>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Number</th>
+            <th>Vendor</th>
+            <th>Amount (€)</th>
+            <th>Date</th>
+            <th>Due Date</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let invoice of filteredInvoices; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ invoice.invoiceNumber }}</td>
+            <td>{{ invoice.vendorName }}</td>
+            <td>{{ invoice.amount | number:'1.2-2' }}</td>
+            <td>{{ invoice.invoiceDate | date:'yyyy-MM-dd' }}</td>
+            <td>{{ invoice.dueDate | date:'yyyy-MM-dd' }}</td>
+            <td>{{ invoice.description }}</td>
+            <td>{{ invoice.status }}</td>
+            <td>
+              <button class="btn-action btn-edit" (click)="editInvoice(invoice)">Edit</button>
+              <button
+              *ngIf="invoice.id"
+              class="btn-action btn-delete"
+              (click)="deleteInvoice(invoice.id)"
+            >
+              Delete
+            </button>            </td>
+          </tr>
+          <tr *ngIf="filteredInvoices.length === 0">
+            <td colspan="9" class="text-center">No invoices found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Filter Inputs -->
+  </div>

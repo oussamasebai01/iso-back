@@ -1,3 +1,4 @@
+// src/app/dashbord/dashbord.component.ts
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,6 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './dashbord.component.html',
   styleUrls: ['./dashbord.component.css']
 })
-export class DashbordComponent {
-
-}
+export class DashbordComponent {}

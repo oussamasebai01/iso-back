@@ -1,11 +1,15 @@
-import { TokenInterceptor } from './token.interceptor';
-import { NgModule } from '@angular/core';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { CommonModule  } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule } from './app-routing.module';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgChartsModule } from 'ng2-charts';
+import { IonicModule } from '@ionic/angular';
+import { ToastrModule } from 'ngx-toastr';
 
+import { TokenInterceptor } from './token.interceptor';
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './templat/header/header.component';
 import { LandingComponent } from './templat/landing/landing.component';
@@ -30,24 +34,18 @@ import { DashbordComponent } from './dashbord/dashbord.component';
 import { RegisterComponent } from './sing/register/register.component';
 import { LoginComponent } from './sing/login/login.component';
 import { SingComponent } from './sing/sing.component';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ConformanceComponent } from './dashbord/conformance/conformance.component';
 import { HrComponent } from './dashbord/hr/hr.component';
 
-
-
-    
- 
 const routes: Routes = [
   {
     path: 'dashboard',
     component: DashbordComponent,
     children: [
-      { path: '', component: MainComponent }, // /dashboard
-      { path: 'conformance', component: ConformanceComponent }, // /dashboard/conformance
-      { path: 'hr', component: HrComponent } // /dashboard/hr
+      { path: '', component: MainComponent },
+      { path: 'conformance', component: ConformanceComponent },
+      { path: 'hr', component: HrComponent }
     ]
   },
   { path: 'register', component: RegisterComponent },
@@ -85,16 +83,18 @@ const routes: Routes = [
     NotFoundComponent,
     ConformanceComponent,
     HrComponent
-
   ],
   imports: [
-    RouterModule.forRoot(routes),
     BrowserModule,
-    AppRoutingModule,
     CommonModule,
     HttpClientModule,
-    BrowserModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule.forRoot(routes),
+    AppRoutingModule,
+    IonicModule.forRoot(),
+    ToastrModule.forRoot(),
+    NgChartsModule  
   ],
   providers: [
     {

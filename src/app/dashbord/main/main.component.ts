@@ -1,34 +1,64 @@
-import { Component, ElementRef, Renderer2, AfterViewInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, Renderer2, AfterViewInit, OnInit } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { RelasationService } from './../../relasation.service';
+import { catchError, Observable, throwError } from 'rxjs';
+import { Invoice } from 'src/app/invoice.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { InvoiceService } from '../../services/invoice.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.css']
 })
-export class MainComponent implements AfterViewInit {
-  invoices: any[] = []; // Liste complète des factures
-  filteredInvoices: any[] = []; // Liste filtrée affichée dans le tableau
-  invoice: any = {
-    invoiceNumber: '',
-    vendorName: '',
-    amount: 0,
-    invoiceDate: '',
-    dueDate: '',
-    description: '',
-    status: 'PENDING'
+export class MainComponent implements OnInit {
+  filterValues = {
+    startDate: '',
+    endDate: '',
+    department: '',
+    project: '',
+    searchTerm: ''
   };
+  
+  resetFilters() {
+    this.filterValues = {
+      startDate: '',
+      endDate: '',
+      department: '',
+      project: '',
+      searchTerm: ''
+    };
+    this.filteredInvoices = [...this.invoices]; // ou tu relances un appel à ton backend si besoin
+  }
+  invoices: Invoice[] = [];
+  filteredInvoices: Invoice[] = [];
+  invoiceForm: FormGroup;
   isEditMode: boolean = false;
   selectedInvoiceId: string | null = null;
-  searchTerm: string = ''; // Terme de recherche
+  searchTerm: string = '';
 
   constructor(
     private el: ElementRef,
     private renderer: Renderer2,
-    public _get: RelasationService,
-    private http: HttpClient
-  ) {}
+    private fb: FormBuilder,
+    private invoiceService: InvoiceService
+  ) {
+    this.invoiceForm = this.fb.group({
+      invoiceNumber: ['', Validators.required],
+      vendorName: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(0)]],
+      invoiceDate: ['', Validators.required],
+      dueDate: ['', Validators.required],
+      description: ['', Validators.required],
+      status: ['PENDING', Validators.required],
+      budget: [null, [Validators.min(0)]],
+      depense: [null, [Validators.min(0)]],
+      gainAnnuel: [null, [Validators.min(0)]],
+      department: [''],
+      project: ['']
+    });
+  }
 
   ngOnInit() {
     this.loadInvoices();
@@ -65,78 +95,142 @@ export class MainComponent implements AfterViewInit {
   }
 
   loadInvoices() {
-    this.http.get<any[]>('http://localhost:8070/api/invoices').subscribe(
-      (res) => {
-        this.invoices = res;
-        this.filteredInvoices = [...this.invoices]; // Initialiser la liste filtrée avec toutes les factures
+    this.invoiceService.getInvoices().subscribe({
+      next: (invoices: Invoice[]) => {
+        this.invoices = invoices;
+        this.filteredInvoices = [...this.invoices];
       },
-      (err) => {
+      error: (err: any) => {
+       
         console.error('Erreur lors du chargement des factures :', err);
       }
-    );
+    });
   }
 
-  onSubmit(formData: any) {
-    if (this.isEditMode) {
-      this.http.put(`http://localhost:8070/api/invoices/${this.selectedInvoiceId}`, formData).subscribe(
-        (response: any) => {
-          console.log('Facture mise à jour :', response);
+  onSubmit() {
+    if (this.invoiceForm.invalid) {
+      
+      return;
+    }
+
+    const invoiceData: Invoice = this.invoiceForm.value;
+
+    if (this.isEditMode && this.selectedInvoiceId) {
+      this.invoiceService.updateInvoice(this.selectedInvoiceId, invoiceData).subscribe({
+        next: (updatedInvoice: Invoice) => {
           const index = this.invoices.findIndex(inv => inv.id === this.selectedInvoiceId);
           if (index !== -1) {
-            this.invoices[index] = { ...response };
-            this.filterInvoices(); // Mettre à jour le tableau filtré après modification
+            this.invoices[index] = updatedInvoice;
+            this.filterInvoices();
           }
+         
           this.resetForm();
         },
-        (error) => {
-          console.error('Erreur lors de la mise à jour :', error);
+        error: (err: any) => {
+          
+          console.error('Erreur lors de la mise à jour :', err);
           this.loadInvoices();
         }
-      );
+      });
     } else {
-      this.http.post('http://localhost:8070/api/invoices', formData).subscribe(
-        (response: any) => {
-          console.log('Facture ajoutée :', response);
-          this.invoices.push(response);
-          this.filterInvoices(); // Mettre à jour le tableau filtré après ajout
+      this.invoiceService.addInvoice(invoiceData).subscribe({
+        next: (newInvoice: Invoice) => {
+          this.invoices.push(newInvoice);
+          this.filterInvoices();
+         
           this.resetForm();
         },
-        (error) => {
-          console.error('Erreur lors de l’ajout :', error);
+        error: (err: any) => {
+          
+          console.error('Erreur lors de l’ajout :', err);
           this.loadInvoices();
         }
-      );
+      });
     }
   }
 
-  editInvoice(invoice: any) {
+  editInvoice(invoice: Invoice) {
     this.isEditMode = true;
-    this.selectedInvoiceId = invoice.id;
-    this.invoice = { ...invoice };
-    this.invoice.invoiceDate = invoice.invoiceDate.split('T')[0];
-    this.invoice.dueDate = invoice.dueDate.split('T')[0];
+    this.selectedInvoiceId = invoice.id || null;
+    this.invoiceForm.patchValue({
+      ...invoice,
+      invoiceDate: invoice.invoiceDate.split('T')[0],
+      dueDate: invoice.dueDate.split('T')[0]
+    });
   }
 
   deleteInvoice(id: string) {
     if (confirm('Voulez-vous vraiment supprimer cette facture ?')) {
-      this.http.delete(`http://localhost:8070/api/invoices/`).subscribe(
-        (response) => {
-          console.log('Facture supprimée :', response);
+      this.invoiceService.deleteInvoice(id).subscribe({
+        next: () => {
           this.invoices = this.invoices.filter(inv => inv.id !== id);
-          this.filterInvoices(); // Mettre à jour le tableau filtré après suppression
+          this.filterInvoices();
+         
         },
-        (error) => {
-          console.error('Erreur lors de la suppression :', error);
+        error: (err: any) => {
+          
+          console.error('Erreur lors de la suppression :', err);
           this.loadInvoices();
         }
-      );
+      });
+    }
+  }
+
+  applyFilters(values: any) {
+    const { startDate, endDate, department, project, searchTerm } = values;
+
+    // Si tous les filtres combinés sont remplis, utiliser le filtre combiné
+    if (startDate && endDate && !department && !project) {
+      this.invoiceService.filterByDateRange(startDate, endDate).subscribe({
+        next: (invoices) => {
+          this.filteredInvoices = invoices;
+        },
+        error: (err) => {
+          console.error('Erreur lors du filtrage par plage de dates :', err);
+        }
+      });
+    }
+    // Sinon, appliquer les filtres individuellement
+    else {
+      let filtered = [...this.invoices];
+
+      // Filtrer par département
+      if (department) {
+        this.invoiceService.filterByDepartment(department).subscribe({
+          next: (invoices) => {
+            filtered = invoices;
+            this.filteredInvoices = filtered;
+          
+          },
+          error: (err) => {
+    
+            console.error('Erreur lors du filtrage par département :', err);
+          }
+        });
+      }
+      // Filtrer par projet
+      else if (project) {
+        this.invoiceService.filterByProject(project).subscribe({
+          next: (invoices) => {
+            filtered = invoices;
+            this.filteredInvoices = filtered;
+          },
+          error: (err) => {
+            console.error('Erreur lors du filtrage par projet :', err);
+          }
+        });
+      }
+    
+      else {
+        this.filteredInvoices = [...this.invoices];
+      }
     }
   }
 
   resetForm() {
     this.isEditMode = false;
     this.selectedInvoiceId = null;
-    this.invoice = {
+    this.invoiceForm.reset({
       invoiceNumber: '',
       vendorName: '',
       amount: 0,
@@ -144,35 +238,40 @@ export class MainComponent implements AfterViewInit {
       dueDate: '',
       description: '',
       status: 'PENDING'
-    };
+    });
   }
 
-  exportToCsv() {
-    this.http.get('http://localhost:8070/api/export/invoices/csv', { responseType: 'blob' }).subscribe(
-      (response: Blob) => {
+  exportReport(format: 'CSV' | 'PDF' | 'JSON', report?: any) {
+    this.invoiceService.exportReport(format, report).subscribe({
+      next: (response: Blob) => {
         const url = window.URL.createObjectURL(response);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'invoices.csv';
+        a.download = `invoices.${format.toLowerCase()}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+      
       },
-      (error) => {
-        console.error('Erreur lors de l’exportation CSV :', error);
+      error: (err: any) => {
+       
+        console.error(`Erreur lors de l’exportation ${format} :`, err);
       }
-    );
+    });
   }
 
-  // Nouvelle méthode pour filtrer les factures
   filterInvoices() {
     if (!this.searchTerm) {
-      this.filteredInvoices = [...this.invoices]; // Si le champ est vide, afficher toutes les factures
+      this.filteredInvoices = [...this.invoices];
     } else {
+      const term = this.searchTerm.toLowerCase();
       this.filteredInvoices = this.invoices.filter(invoice =>
-        invoice.vendorName.toLowerCase().includes(this.searchTerm.toLowerCase())
-      ); // Filtrer par vendorName (insensible à la casse)
+        (invoice.invoiceNumber?.toLowerCase().includes(term) || false) ||
+        (invoice.vendorName?.toLowerCase().includes(term) || false) ||
+        (invoice.status?.toLowerCase().includes(term) || false) ||
+        (invoice.description?.toLowerCase().includes(term) || false)
+      );
     }
   }
 }

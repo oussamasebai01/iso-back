@@ -1,5 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { DashboardData } from 'src/app/services/dashboard.service';
+import { DashboardService } from '../../services/dashboard.service';
 interface Role {
   id?: string;
   name: string;
@@ -11,15 +14,35 @@ interface Role {
   styleUrls: ['./hr.component.css']
 })
 export class HrComponent implements OnInit{
+  dashboardData: DashboardData | null = null;
+  startDate = '2023-01-01';
+  endDate = '2023-12-31';
+
+  // Chart configurations
+  barChartType: ChartType = 'bar';
+  barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100
+      }
+    }
+  };
+
+  turnoverChartData: ChartData<'bar'> = { labels: [], datasets: [] };
+  trainingChartData: ChartData<'bar'> = { labels: [], datasets: [] };
+  performanceChartData: ChartData<'bar'> = { labels: [], datasets: [] };
   roles: Role[] = [];
   currentRole: Role = { name: '' };
   editMode: boolean = false;
   private apiUrl = 'http://localhost:8070/api/roles';  // URL de votre API
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.loadRoles();
+    this.loadDashboardData();
   }
 
   // Charger tous les rôles
@@ -29,6 +52,18 @@ export class HrComponent implements OnInit{
       (error: any) => console.error('Erreur lors du chargement des rôles', error)
     );
   }
+  loadDashboardData(): void {
+    this.dashboardService.getDashboardData(this.startDate, this.endDate).subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.updateCharts();
+      },
+      error: (err) => {
+        console.error('Error fetching dashboard data:', err);
+      }
+    });
+  }
+  
 
   // Soumettre le formulaire (ajout ou mise à jour)
   onSubmit(): void {
@@ -37,6 +72,49 @@ export class HrComponent implements OnInit{
     } else {
       this.createRole();
     }
+  }
+  updateCharts(): void {
+    if (!this.dashboardData) return;
+
+    const departments = Object.keys(this.dashboardData.departments);
+
+    // Turnover Chart
+    this.turnoverChartData = {
+      labels: departments,
+      datasets: [
+        {
+          label: 'Turnover Rate (%)',
+          data: departments.map(dept => this.dashboardData!.departments[dept].turnoverRate),
+          backgroundColor: 'rgba(255, 99, 132, 0.5)'
+        }
+      ]
+    }
+    this.trainingChartData = {
+      labels: departments,
+      datasets: [
+        {
+          label: 'Training Completion Rate (%)',
+          data: departments.map(dept => this.dashboardData!.departments[dept].trainingCompletionRate),
+          backgroundColor: 'rgba(54, 162, 235, 0.5)'
+        }
+      ]
+    };
+
+    // Performance Chart (average per department)
+    this.performanceChartData = {
+      labels: departments,
+      datasets: [
+        {
+          label: 'Average Performance Score',
+          data: departments.map(dept => {
+            const metrics = this.dashboardData!.departments[dept].performanceMetrics;
+            const scores = Object.values(metrics);
+            return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+          }),
+          backgroundColor: 'rgba(75, 192, 192, 0.5)'
+        }
+      ]
+    };
   }
 
   // Créer un rôle

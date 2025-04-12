@@ -9,7 +9,7 @@
         <label>
           <input
             type="text"
-            placeholder="Search by number, vendor, status, or description"
+            placeholder="                   Search by vendor"
             [(ngModel)]="searchTerm"
             (input)="filterInvoices()"
           />
@@ -223,8 +223,6 @@
       <h2>Invoice List</h2>
       <div class="export-buttons">
         <button class="btn-export" (click)="exportReport('CSV')">Export to CSV</button>
-        <button class="btn-export" (click)="exportReport('PDF')">Export to PDF</button>
-        <button class="btn-export" (click)="exportReport('JSON')">Export to JSON</button>
       </div>
       <form class="filter-form" (ngSubmit)="applyFilters(filterForm.value)" #filterForm="ngForm">
         <div class="filter-row">

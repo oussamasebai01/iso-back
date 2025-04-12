@@ -17,7 +17,7 @@
     <div class="conformance">
         <!-- ======================= Non-Conformance Form ================== -->
         <div class="non-conformance-form">
-            <h2>{{ isEditMode ? 'Edit Non-Conformance' : 'Add New Non-Conformance' }}</h2>
+            <h2>{{ isEditMode ? 'Edit quality Issues' : 'Add New quality Issues' }}</h2>
             <form #nonConformanceForm="ngForm" (ngSubmit)="onSubmit(nonConformanceForm.value)">
                 <div class="form-group">
                     <label for="title">Title</label>
@@ -48,7 +48,7 @@
 
         <!-- ======================= Non-Conformance Table ================== -->
         <div class="non-conformance-table">
-            <h2>List of Non-Conformances</h2>
+            <h2>List of quality Issues</h2>
             <table>
                 <thead>
                     <tr>
